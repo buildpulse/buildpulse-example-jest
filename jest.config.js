@@ -4,5 +4,13 @@
  */
 
 module.exports = {
-  reporters: [ "default" ]
+  "reporters": [
+    "default",
+    ["jest-junit", {
+      addFileAttribute: "true",
+      ancestorSeparator: " › ",
+      classNameTemplate: "{classname}",
+      titleTemplate: "{title}",
+    }]
+  ]
 };
