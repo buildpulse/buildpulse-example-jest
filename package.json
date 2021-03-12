@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Workshop64/buildpulse-example-jest.git"
+    "url": "git+https://github.com/buildpulse/buildpulse-example-jest.git"
   },
   "author": "Jason Rudolph",
   "license": "MIT",
