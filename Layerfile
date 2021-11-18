@@ -1,0 +1,11 @@
+FROM vm/ubuntu:18.04
+
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash && \
+    apt install nodejs && \
+    rm -f /etc/apt/sources.list.d/nodesource.list
+
+COPY . .
+
+RUN npm ci
+
+RUN npm test
