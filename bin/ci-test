@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Upload test results to BuildPulse for flaky test detection.
+# Use `trap` to ensure that results are uploaded even when the tests fail.
+curl -fsSL --retry 3 --retry-connrefused https://get.buildpulse.io/test-reporter-linux-amd64 > ./buildpulse-test-reporter
+chmod +x ./buildpulse-test-reporter
+trap "./buildpulse-test-reporter submit junit.xml --account-id 68192324 --repository-id 346854346" EXIT # Replace IDs with your BuildPulse account ID and repository ID
+
+npm test
