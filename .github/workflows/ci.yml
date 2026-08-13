@@ -1,31 +1,39 @@
 name: CI
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
+  # Pushes run on BuildPulse runners and upload results to BuildPulse.
+  test:
+    if: github.event_name == 'push'
+    runs-on: bp-ubuntu-latest-x64-2x
     steps:
-    - name: Check out code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx jest --reporters=default --reporters=jest-junit
+        env:
+          JEST_JUNIT_OUTPUT_DIR: test-results
+      - name: Upload test results to BuildPulse
+        # BuildPulse is most useful when tests FAILED, so run on red builds too.
+        if: always()
+        uses: BuildPulseLLC/test-reporter-action@v3
+        with:
+          api-token: ${{ secrets.BUILDPULSE_API_TOKEN }}
+          path: test-results
 
-    - name: Set up Node
-      uses: actions/setup-node@v1
-      with:
-        node-version: 14.x
-
-    - run: npm ci
-
-    - run: npm test
-
-    - name: Upload test results to BuildPulse for flaky test detection
-      if: '!cancelled()' # Run this step even when the tests fail. Skip if the workflow is cancelled.
-      uses: buildpulse/buildpulse-action@main
-      with:
-        account: 68192324 # Replace this value with your BuildPulse account ID
-        repository: 346854346 # Replace this value with your BuildPulse repository ID
-        path: .
-        key: ${{ secrets.BUILDPULSE_ACCESS_KEY_ID }}
-        secret: ${{ secrets.BUILDPULSE_SECRET_ACCESS_KEY }}
+  # Pull requests (including forks, which have no secrets) build on GitHub-hosted.
+  test-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test
